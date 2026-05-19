@@ -1,0 +1,58 @@
+package org.example.qaagent.service;
+
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.elasticsearch.core.search.Hit;
+import org.example.qaagent.model.RetrievedChunk;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+@Component
+public class VectorRetriever {
+    private final ElasticsearchClient esClient;
+    private final String indexName;
+
+    public VectorRetriever(ElasticsearchClient esClient,
+                            @Value("${elasticsearch.index-name:rag-knowledge}") String indexName) {
+        this.esClient = esClient;
+        this.indexName = indexName;
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<RetrievedChunk> search(float[] queryVector, int topK) throws IOException {
+        SearchResponse<Map> response = esClient.search(s -> s
+            .index(indexName)
+            .knn(k -> k
+                .field("embedding")
+                .queryVector(toFloatList(queryVector))
+                .k((long) topK)
+                .numCandidates((long) topK * 10)
+            )
+            .size(topK),
+            Map.class
+        );
+
+        List<RetrievedChunk> results = new ArrayList<>();
+        for (Hit<Map> hit : response.hits().hits()) {
+            Map<String, Object> source = hit.source();
+            results.add(new RetrievedChunk(
+                (String) source.get("content"),
+                (String) source.get("source_file"),
+                source.get("chunk_index") instanceof Integer ? (Integer) source.get("chunk_index") : 0,
+                hit.score()
+            ));
+        }
+        return results;
+    }
+
+    private List<Float> toFloatList(float[] arr) {
+        List<Float> list = new ArrayList<>(arr.length);
+        for (float f : arr) list.add(f);
+        return list;
+    }
+}

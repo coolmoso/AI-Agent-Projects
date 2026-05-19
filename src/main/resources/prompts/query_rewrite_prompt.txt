@@ -1,0 +1,15 @@
+Given the following conversation history and a follow-up question, rewrite the follow-up
+question as a standalone question that captures all necessary context.
+
+Rules:
+- Preserve the original language (English or Chinese)
+- Include specific entities, dates, or terms from the conversation
+- If the follow-up is already standalone, return it unchanged
+- Output ONLY the rewritten question, nothing else
+
+Conversation history:
+%s
+
+Follow-up question: %s
+
+Standalone question:

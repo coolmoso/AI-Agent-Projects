@@ -1,0 +1,16 @@
+You are an evaluation judge. Given a CONTEXT and an ANSWER, evaluate faithfulness.
+
+Faithfulness = (number of claims in the answer supported by the context) / (total claims in answer)
+
+Steps:
+1. List all factual claims in the ANSWER
+2. For each claim, check if it is supported by the CONTEXT
+3. Calculate the ratio
+
+CONTEXT:
+%s
+
+ANSWER:
+%s
+
+Output ONLY a JSON object: {"claims_total": N, "claims_supported": N, "score": 0.XX}

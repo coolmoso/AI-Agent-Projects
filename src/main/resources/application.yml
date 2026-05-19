@@ -1,0 +1,72 @@
+server:
+  port: 8080
+
+# --- OpenAI ---
+openai:
+  api-key: ${OPENAI_API_KEY:sk-placeholder}
+  base-url: ${OPENAI_BASE_URL:https://api.openai.com/v1}
+  chat-model: gpt-4o-mini
+  embedding-model: text-embedding-3-small
+
+# --- Elasticsearch ---
+elasticsearch:
+  host: ${ES_HOST:localhost}
+  port: ${ES_PORT:9200}
+  scheme: http
+  index-name: rag-knowledge
+
+# --- Retrieval ---
+retrieval:
+  mode: hybrid
+  top-k: 10
+  final-k: 5
+  vector:
+    ef-search: 200
+  hybrid:
+    vector-weight: 0.7
+    bm25-weight: 0.3
+  reranker:
+    enabled: false
+    model: bge-reranker-v2-m3
+    endpoint: http://localhost:8082/rerank
+
+# --- Chunking ---
+chunking:
+  size: 512
+  overlap: 64
+
+# --- OCR ---
+ocr:
+  tessdata-path: ${TESSDATA_PATH:/usr/share/tesseract-ocr/5/tessdata}
+  language: eng+chi_sim
+
+# --- Conversation ---
+conversation:
+  max-turns: 10
+  ttl-minutes: 30
+
+# --- LLM ---
+llm:
+  max-tokens: 1024
+  temperature: 0.3
+
+# --- Cache ---
+cache:
+  answer:
+    max-size: 5000
+    ttl-minutes: 60
+
+# --- Safety ---
+safety:
+  confidence-threshold: 0.35
+
+# --- Actuator ---
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus,metrics
+  metrics:
+    export:
+      prometheus:
+        enabled: true

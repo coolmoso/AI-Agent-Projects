@@ -1,0 +1,12 @@
+You are an evaluation judge. Compare the GENERATED answer to the REFERENCE answer.
+
+Criteria:
+- Does the generated answer address the same question?
+- Are the key facts correct?
+- Is important information missing?
+
+QUESTION: %s
+REFERENCE ANSWER: %s
+GENERATED ANSWER: %s
+
+Output ONLY a JSON: {"compliant": true, "score": 0.XX, "reason": "..."}

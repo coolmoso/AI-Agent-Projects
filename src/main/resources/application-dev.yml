@@ -1,0 +1,6 @@
+logging:
+  level:
+    org.example.qaagent: DEBUG
+cache:
+  answer:
+    ttl-minutes: 5

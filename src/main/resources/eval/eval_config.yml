@@ -1,0 +1,9 @@
+evaluation:
+  thresholds:
+    faithfulness: 0.85
+    context-precision: 0.70
+    compliance: 0.80
+    style-consistency: 0.80
+    refusal-accuracy: 0.80
+  dataset: classpath:eval/eval_dataset.jsonl
+  output-dir: eval-results

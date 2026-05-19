@@ -1,0 +1,9 @@
+logging:
+  level:
+    org.example.qaagent: INFO
+cache:
+  answer:
+    max-size: 20000
+    ttl-minutes: 120
+safety:
+  confidence-threshold: 0.40
