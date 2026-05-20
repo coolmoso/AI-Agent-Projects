@@ -6,7 +6,8 @@ openai:
   api-key: ${OPENAI_API_KEY:sk-placeholder}
   base-url: ${OPENAI_BASE_URL:https://api.openai.com/v1}
   chat-model: gpt-4o-mini
-  embedding-model: text-embedding-3-small
+  embedding-model: text-embedding-3-large
+  embedding-dimensions: 3072
 
 # --- Elasticsearch ---
 elasticsearch:
@@ -23,8 +24,8 @@ retrieval:
   vector:
     ef-search: 200
   hybrid:
-    vector-weight: 0.7
-    bm25-weight: 0.3
+    vector-weight: 0.6
+    bm25-weight: 0.4
   reranker:
     enabled: false
     model: bge-reranker-v2-m3

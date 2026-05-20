@@ -27,7 +27,7 @@ public class EmbeddingService {
 
     public EmbeddingService(
             @Value("${openai.api-key}") String apiKey,
-            @Value("${openai.embedding-model:text-embedding-3-small}") String model,
+            @Value("${openai.embedding-model:text-embedding-3-large}") String model,
             @Value("${openai.base-url:https://api.openai.com/v1}") String baseUrl) {
         this.apiKey = apiKey;
         this.model = model;
