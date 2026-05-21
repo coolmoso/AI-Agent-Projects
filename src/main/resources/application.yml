@@ -1,11 +1,18 @@
 server:
   port: 8080
 
+spring:
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+      enabled: true
+
 # --- OpenAI ---
 openai:
   api-key: ${OPENAI_API_KEY:sk-placeholder}
   base-url: ${OPENAI_BASE_URL:https://api.openai.com/v1}
-  chat-model: gpt-4o-mini
+  chat-model: text-embedding-3-small
   embedding-model: text-embedding-3-large
   embedding-dimensions: 3072
 

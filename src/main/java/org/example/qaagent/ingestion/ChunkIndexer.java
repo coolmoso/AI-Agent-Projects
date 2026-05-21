@@ -39,8 +39,8 @@ public class ChunkIndexer {
                 .analysis(a -> a
                     .analyzer("bilingual", an -> an
                         .custom(cu -> cu
-                            .tokenizer("icu_tokenizer")
-                            .filter("lowercase", "icu_folding")
+                            .tokenizer("standard")
+                            .filter("lowercase", "asciifolding")
                         )
                     )
                 )
