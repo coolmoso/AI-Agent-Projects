@@ -1,10 +1,12 @@
 package org.example.qaagent.ingestion;
 
+import org.example.qaagent.model.SectionChunk;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class TextChunker {
@@ -19,9 +21,26 @@ public class TextChunker {
         this.chunkOverlap = chunkOverlap;
     }
 
+    /**
+     * Legacy method for backward compatibility - returns plain text chunks.
+     */
     public List<String> chunk(String text) {
+        List<SectionChunk> sectionChunks = chunkWithMetadata(text, Map.of());
+        return sectionChunks.stream().map(SectionChunk::content).toList();
+    }
+
+    /**
+     * New method that returns SectionChunk objects with preserved metadata.
+     * @param text the text to chunk
+     * @param sectionHeaders the section metadata to preserve
+     * @return list of SectionChunk objects
+     */
+    public List<SectionChunk> chunkWithMetadata(String text, Map<String, String> sectionHeaders) {
         List<String> rawChunks = splitRecursive(text, 0);
-        return applyOverlap(rawChunks);
+        List<String> chunksWithOverlap = applyOverlap(rawChunks);
+        return chunksWithOverlap.stream()
+                .map(chunk -> new SectionChunk(chunk, sectionHeaders))
+                .toList();
     }
 
     private List<String> splitRecursive(String text, int separatorIndex) {

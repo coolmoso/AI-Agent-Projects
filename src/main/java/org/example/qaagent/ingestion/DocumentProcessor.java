@@ -1,5 +1,6 @@
 package org.example.qaagent.ingestion;
 
+import org.example.qaagent.model.SectionChunk;
 import org.example.qaagent.util.LanguageDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -17,15 +19,17 @@ public class DocumentProcessor {
     private final PdfExtractor pdfExtractor;
     private final OcrProcessor ocrProcessor;
     private final TextChunker textChunker;
+    private final MarkdownHeaderTextSplitter markdownSplitter;
     private final ChunkIndexer chunkIndexer;
     private final LanguageDetector languageDetector;
 
     public DocumentProcessor(PdfExtractor pdfExtractor, OcrProcessor ocrProcessor,
-                              TextChunker textChunker, ChunkIndexer chunkIndexer,
-                              LanguageDetector languageDetector) {
+                              TextChunker textChunker, MarkdownHeaderTextSplitter markdownSplitter,
+                              ChunkIndexer chunkIndexer, LanguageDetector languageDetector) {
         this.pdfExtractor = pdfExtractor;
         this.ocrProcessor = ocrProcessor;
         this.textChunker = textChunker;
+        this.markdownSplitter = markdownSplitter;
         this.chunkIndexer = chunkIndexer;
         this.languageDetector = languageDetector;
     }
@@ -52,9 +56,26 @@ public class DocumentProcessor {
         }
 
         String language = languageDetector.detect(text);
-        List<String> chunks = textChunker.chunk(text);
         chunkIndexer.createIndexIfNotExists();
-        chunkIndexer.indexChunks(chunks, file.getName(), language);
-        log.info("Processed {}: {} chunks, lang={}", file.getName(), chunks.size(), language);
+
+        // Use MarkdownHeaderTextSplitter + RecursiveCharacterTextSplitter pipeline for .md files
+        if (fileName.endsWith(".md")) {
+            List<SectionChunk> sections = markdownSplitter.split(text);
+            List<SectionChunk> finalChunks = new ArrayList<>();
+            for (SectionChunk section : sections) {
+                List<SectionChunk> sectionChunks = textChunker.chunkWithMetadata(
+                    section.content(),
+                    section.sectionHeaders()
+                );
+                finalChunks.addAll(sectionChunks);
+            }
+            chunkIndexer.indexSectionChunks(finalChunks, file.getName(), language);
+            log.info("Processed {}: {} chunks (markdown pipeline), lang={}", file.getName(), finalChunks.size(), language);
+        } else {
+            // Use plain TextChunker for non-markdown files
+            List<String> chunks = textChunker.chunk(text);
+            chunkIndexer.indexChunks(chunks, file.getName(), language);
+            log.info("Processed {}: {} chunks (standard pipeline), lang={}", file.getName(), chunks.size(), language);
+        }
     }
 }

@@ -40,14 +40,32 @@ public class VectorRetriever {
         List<RetrievedChunk> results = new ArrayList<>();
         for (Hit<Map> hit : response.hits().hits()) {
             Map<String, Object> source = hit.source();
+            Map<String, String> sectionHeaders = extractSectionHeaders(source);
             results.add(new RetrievedChunk(
                 (String) source.get("content"),
                 (String) source.get("source_file"),
                 source.get("chunk_index") instanceof Integer ? (Integer) source.get("chunk_index") : 0,
-                hit.score()
+                hit.score(),
+                sectionHeaders
             ));
         }
         return results;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, String> extractSectionHeaders(Map<String, Object> source) {
+        Map<String, String> headers = new LinkedHashMap<>();
+        if (source.containsKey("section_headers")) {
+            Object headersObj = source.get("section_headers");
+            if (headersObj instanceof Map) {
+                for (Map.Entry<String, Object> entry : ((Map<String, Object>) headersObj).entrySet()) {
+                    if (entry.getValue() instanceof String) {
+                        headers.put(entry.getKey(), (String) entry.getValue());
+                    }
+                }
+            }
+        }
+        return headers;
     }
 
     private List<Float> toFloatList(float[] arr) {

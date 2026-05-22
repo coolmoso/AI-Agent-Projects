@@ -10,21 +10,21 @@ import java.util.List;
 @Service
 public class RetrieverRouter {
     private final VectorRetriever vectorRetriever;
-    private final HybridRetriever hybridRetriever;
+    private final EnsembleRetriever ensembleRetriever;
     private final String mode;
 
     public RetrieverRouter(VectorRetriever vectorRetriever,
-                            HybridRetriever hybridRetriever,
-                            @Value("${retrieval.mode:hybrid}") String mode) {
+                            EnsembleRetriever ensembleRetriever,
+                            @Value("${retrieval.mode:ensemble}") String mode) {
         this.vectorRetriever = vectorRetriever;
-        this.hybridRetriever = hybridRetriever;
+        this.ensembleRetriever = ensembleRetriever;
         this.mode = mode;
     }
 
     public List<RetrievedChunk> retrieve(String query, float[] queryVector, int topK) throws IOException {
         return switch (mode) {
             case "vector" -> vectorRetriever.search(queryVector, topK);
-            case "hybrid" -> hybridRetriever.search(query, queryVector, topK);
+            case "ensemble" -> ensembleRetriever.search(query, queryVector, topK);
             default -> throw new IllegalArgumentException("Unknown retrieval mode: " + mode);
         };
     }

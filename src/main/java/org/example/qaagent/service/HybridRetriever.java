@@ -5,12 +5,15 @@ import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import org.example.qaagent.model.RetrievedChunk;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.*;
 
-@Component
+/**
+ * @deprecated Use {@link EnsembleRetriever} instead. This class is kept for backward compatibility
+ * but is no longer registered as a Spring component.
+ */
+@Deprecated
 public class HybridRetriever {
     private final ElasticsearchClient esClient;
     private final String indexName;

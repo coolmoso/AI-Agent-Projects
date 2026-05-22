@@ -48,6 +48,10 @@ ocr:
   tessdata-path: ${TESSDATA_PATH:/usr/share/tesseract-ocr/5/tessdata}
   language: eng+chi_sim
 
+# --- Ingestion ---
+ingestion:
+  docs-directory: docs
+
 # --- Conversation ---
 conversation:
   max-turns: 10

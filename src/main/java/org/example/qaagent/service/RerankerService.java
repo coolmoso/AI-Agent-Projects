@@ -67,7 +67,7 @@ public class RerankerService {
                 RetrievedChunk original = chunks.get(index);
                 reranked.add(new RetrievedChunk(
                     original.content(), original.sourceFile(),
-                    original.chunkIndex(), score
+                    original.chunkIndex(), score, original.sectionHeaders()
                 ));
             }
             reranked.sort(Comparator.comparingDouble(RetrievedChunk::score).reversed());

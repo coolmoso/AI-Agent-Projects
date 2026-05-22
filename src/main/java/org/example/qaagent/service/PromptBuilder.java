@@ -37,8 +37,10 @@ public class PromptBuilder {
         StringBuilder contextBuilder = new StringBuilder();
         for (int i = 0; i < chunks.size(); i++) {
             RetrievedChunk c = chunks.get(i);
-            contextBuilder.append(String.format("[Chunk %d | Source: %s | Score: %.3f]\n%s\n\n",
-                    i + 1, c.sourceFile(), c.score(), c.content()));
+            String sectionPath = c.sectionPath();
+            String sectionInfo = sectionPath.isEmpty() ? "" : String.format(" | Section: %s", sectionPath);
+            contextBuilder.append(String.format("[Chunk %d | Source: %s%s | Score: %.3f]\n%s\n\n",
+                    i + 1, c.sourceFile(), sectionInfo, c.score(), c.content()));
         }
         String systemPrompt = String.format(SYSTEM_PROMPT_TEMPLATE, contextBuilder.toString());
 
