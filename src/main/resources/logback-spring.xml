@@ -7,6 +7,8 @@
             <includeMdcKeyName>sessionId</includeMdcKeyName>
             <includeMdcKeyName>rewrittenQuery</includeMdcKeyName>
             <includeMdcKeyName>confidenceScore</includeMdcKeyName>
+            <includeMdcKeyName>queryComplexity</includeMdcKeyName>
+            <includeMdcKeyName>selectedModel</includeMdcKeyName>
         </encoder>
     </appender>
 

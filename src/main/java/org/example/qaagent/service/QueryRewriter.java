@@ -12,6 +12,7 @@ import java.util.List;
 public class QueryRewriter {
     private static final Logger log = LoggerFactory.getLogger(QueryRewriter.class);
     private final LlmClient llmClient;
+    private final ModelRouter modelRouter;
 
     private static final String REWRITE_PROMPT = """
         Given the following conversation history and a follow-up question, rewrite the follow-up
@@ -30,8 +31,9 @@ public class QueryRewriter {
 
         Standalone question:""";
 
-    public QueryRewriter(LlmClient llmClient) {
+    public QueryRewriter(LlmClient llmClient, ModelRouter modelRouter) {
         this.llmClient = llmClient;
+        this.modelRouter = modelRouter;
     }
 
     public String rewrite(String query, List<ConversationTurn> history) throws IOException {
@@ -45,8 +47,12 @@ public class QueryRewriter {
         }
 
         String prompt = String.format(REWRITE_PROMPT, historyStr.toString(), query);
-        String rewritten = llmClient.complete(prompt, 150, 0.0);
-        log.info("Query rewritten: '{}' -> '{}'", query, rewritten.strip());
+        
+        // Use fallback model for query rewriting (faster, less critical for quality)
+        String rewriteModel = modelRouter.selectModel(query, 1.0, 0.3, ModelRouter.ModelPurpose.REWRITING);
+        String rewritten = llmClient.complete(prompt, 150, 0.0, rewriteModel);
+        
+        log.info("Query rewritten using model '{}': '{}' -> '{}'", rewriteModel, query, rewritten.strip());
         return rewritten.strip();
     }
 }

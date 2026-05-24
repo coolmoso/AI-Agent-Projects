@@ -28,6 +28,8 @@ public class ChatService {
     private final PiiRedactor piiRedactor;
     private final MetricsCollector metricsCollector;
     private final Cache<String, ChatResponse> answerCache;
+    private final ModelRouter modelRouter;
+    private final QualityEvaluator qualityEvaluator;
 
     private final int topK;
     private final int finalK;
@@ -46,6 +48,8 @@ public class ChatService {
                         PiiRedactor piiRedactor,
                         MetricsCollector metricsCollector,
                         Cache<String, ChatResponse> answerCache,
+                        ModelRouter modelRouter,
+                        QualityEvaluator qualityEvaluator,
                         @Value("${retrieval.top-k:10}") int topK,
                         @Value("${retrieval.final-k:5}") int finalK,
                         @Value("${llm.max-tokens:1024}") int maxTokens,
@@ -62,6 +66,8 @@ public class ChatService {
         this.piiRedactor = piiRedactor;
         this.metricsCollector = metricsCollector;
         this.answerCache = answerCache;
+        this.modelRouter = modelRouter;
+        this.qualityEvaluator = qualityEvaluator;
         this.topK = topK;
         this.finalK = finalK;
         this.maxTokens = maxTokens;
@@ -84,6 +90,10 @@ public class ChatService {
             // 2. Rewrite query for multi-turn context
             String standaloneQuery = queryRewriter.rewrite(request.query(), history);
             MDC.put("rewrittenQuery", standaloneQuery);
+
+            // 2.5. Calculate query complexity for model routing
+            double queryComplexity = modelRouter.calculateComplexity(standaloneQuery);
+            MDC.put("queryComplexity", String.valueOf(queryComplexity));
 
             // 3. Cache check
             String cacheKey = standaloneQuery.toLowerCase().strip();
@@ -128,9 +138,16 @@ public class ChatService {
             // 9. Build prompt
             PromptBuilder.PromptResult prompt = promptBuilder.build(standaloneQuery, reranked, history);
 
-            // 10. Generate answer
+            // 10. Select model based on query complexity and confidence
+            String selectedModel = modelRouter.selectModel(
+                standaloneQuery, confidence, queryComplexity, ModelRouter.ModelPurpose.CHAT);
+            MDC.put("selectedModel", selectedModel);
+            log.info("Selected model: {} (complexity: {}, confidence: {})", 
+                selectedModel, String.format("%.2f", queryComplexity), String.format("%.2f", confidence));
+
+            // 11. Generate answer with selected model
             String rawAnswer = llmClient.chatCompletion(
-                prompt.systemPrompt(), prompt.messages(), maxTokens, temperature);
+                prompt.systemPrompt(), prompt.messages(), maxTokens, temperature, selectedModel);
             TokenUsage tokenUsage = llmClient.getLastTokenUsage();
 
             // 11. PII redaction

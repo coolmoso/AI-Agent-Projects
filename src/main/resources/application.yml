@@ -12,9 +12,20 @@ spring:
 openai:
   api-key: ${OPENAI_API_KEY:sk-placeholder}
   base-url: ${OPENAI_BASE_URL:https://api.openai.com/v1}
-  chat-model: text-embedding-3-small
+  chat-model: gpt-4o-mini
   embedding-model: text-embedding-3-large
   embedding-dimensions: 3072
+  # Model routing configuration
+  models:
+    primary: gpt-4o
+    fallback: gpt-3.5-turbo
+    evaluation: gpt-4
+  # Model selection strategy
+  routing:
+    enabled: true
+    complexity-threshold: 0.5
+    confidence-threshold: 0.7
+    max-concurrent-fallback: 10
 
 # --- Elasticsearch ---
 elasticsearch:

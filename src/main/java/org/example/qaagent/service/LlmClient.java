@@ -42,12 +42,17 @@ public class LlmClient {
 
     public String chatCompletion(String systemPrompt, List<Map<String, String>> messages,
                                   int maxTokens, double temperature) throws IOException {
+        return chatCompletion(systemPrompt, messages, maxTokens, temperature, model);
+    }
+
+    public String chatCompletion(String systemPrompt, List<Map<String, String>> messages,
+                                  int maxTokens, double temperature, String modelOverride) throws IOException {
         var allMessages = new java.util.ArrayList<Map<String, String>>();
         allMessages.add(Map.of("role", "system", "content", systemPrompt));
         allMessages.addAll(messages);
 
         Map<String, Object> body = Map.of(
-            "model", model,
+            "model", modelOverride != null ? modelOverride : model,
             "messages", allMessages,
             "max_tokens", maxTokens,
             "temperature", temperature
@@ -80,6 +85,11 @@ public class LlmClient {
     public String complete(String prompt, int maxTokens, double temperature) throws IOException {
         return chatCompletion("You are a helpful assistant.",
             List.of(Map.of("role", "user", "content", prompt)), maxTokens, temperature);
+    }
+
+    public String complete(String prompt, int maxTokens, double temperature, String modelOverride) throws IOException {
+        return chatCompletion("You are a helpful assistant.",
+            List.of(Map.of("role", "user", "content", prompt)), maxTokens, temperature, modelOverride);
     }
 
     public TokenUsage getLastTokenUsage() { return lastTokenUsage; }
